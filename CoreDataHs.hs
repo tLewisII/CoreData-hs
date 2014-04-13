@@ -5,48 +5,47 @@ import Data.Maybe
 import Data.List
 -- | The main entry point.
 data Attribute = Attribute {
-                              attrName :: (Maybe String)
-                            , attrType :: (Maybe String)
-                           } deriving Show
+                              attrName :: String
+                            , attrType :: String
+                           } deriving (Show)
 data Entity = Entity {
-                        entityName :: (Maybe String)
+                        entityName :: String
                       , entityAttributes :: [Attribute]
-                      , entityRelationships :: [(Maybe String)]
-                     } deriving Show
+                      , entityRelationships :: [String]
+                     } deriving (Show)
 
 simpleName s = QName s Nothing Nothing
 
-typeAttr :: Element -> (Maybe String)
-typeAttr e = (findAttr $ simpleName "attributeType") e
+typeAttr :: Element -> String
+typeAttr e = fromJust $ (findAttr $ simpleName "attributeType") e
 
-nameAttr :: Element -> (Maybe String)
-nameAttr e = (findAttr $ simpleName "name") e
+nameAttr :: Element -> String
+nameAttr e = fromJust $ (findAttr $ simpleName "name") e
 
-children :: Element -> [Element]
-children e = (findChildren $ simpleName "attribute") e
+attrElements :: Element -> [Element]
+attrElements e = (findChildren $ simpleName "attribute") e
 
 relChild :: Element -> [Element]
 relChild e = (findChildren $ simpleName "relationship") e
 
-relationships :: Element -> [(Maybe String)]
+relationships :: Element -> [String]
 relationships e = (map nameAttr (relChild e))
 
 buildEntity :: Element -> Entity
-buildEntity e = (Entity (nameAttr e) (map buildAttribute (children e))  (relationships e))
+buildEntity e = (Entity (nameAttr e) (map buildAttribute (attrElements e))  (relationships e))
 
-entityAttrs :: Element -> [(Maybe String)]
-entityAttrs e = (map nameAttr (children e))
+entityAttrs :: Element -> [String]
+entityAttrs e = (map nameAttr (attrElements e))
 
 findEntity :: String -> [Entity] -> (Maybe Entity)
 findEntity "" _ = Nothing
 findEntity _ [] = Nothing
-findEntity s e = find (\(Entity (Just name) _ _) -> name == s) e
+findEntity s e = find (\(Entity name _ _) -> name == s) e
 
 buildAttribute :: Element -> Attribute
 buildAttribute e = (Attribute (nameAttr e) (typeAttr e))
 
 main :: IO ()
-
 main = do
   xml <- readFile "TLKCustomerToolKit.xcdatamodeld/TLKCustomerToolKit.xcdatamodel/contents"
   let content     = parseXML xml
