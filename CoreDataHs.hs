@@ -1,10 +1,14 @@
--- | Main entry point to the application.
-module Main where
+module CoreDataHs
+( modelEntities
+, fullModelPath
+, findEntity
+) where
+
 import Text.XML.Light
 import Data.Maybe
 import Data.List
 import System.Environment
--- | The main entry point.
+
 data Attribute = Attribute {
                               attrName :: String
                             , attrType :: String
@@ -49,12 +53,9 @@ buildAttribute e = (Attribute (nameAttr e) (typeAttr e))
 fullModelPath :: String -> String
 fullModelPath s = (s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents")
 
-main :: IO ()
-main = do
-  args <- getArgs
-  let modelName   = if (length args) > 0 then (head args) else error "no Model name given."
-  xml <- readFile (fullModelPath modelName)
-  let content     = parseXML xml
-      allEntities = concatMap (findElements $ simpleName "entity") (onlyElems content)
-      entities    = map buildEntity allEntities
-  print entities
+modelEntities ::  String -> [Entity]
+modelEntities s = entities
+                    where
+                    content     = parseXML s
+                    allEntities = concatMap (findElements $ simpleName "entity") (onlyElems content)
+                    entities    = map buildEntity allEntities
