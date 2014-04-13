@@ -3,6 +3,7 @@ module Main where
 import Text.XML.Light
 import Data.Maybe
 import Data.List
+import System.Environment
 -- | The main entry point.
 data Attribute = Attribute {
                               attrName :: String
@@ -45,9 +46,14 @@ findEntity s e = find (\(Entity name _ _) -> name == s) e
 buildAttribute :: Element -> Attribute
 buildAttribute e = (Attribute (nameAttr e) (typeAttr e))
 
+fullModelPath :: String -> String
+fullModelPath s = (s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents")
+
 main :: IO ()
 main = do
-  xml <- readFile "TLKCustomerToolKit.xcdatamodeld/TLKCustomerToolKit.xcdatamodel/contents"
+  args <- getArgs
+  let modelName   = if (length args) > 0 then (head args) else error "no Model name given."
+  xml <- readFile (fullModelPath modelName)
   let content     = parseXML xml
       allEntities = concatMap (findElements $ simpleName "entity") (onlyElems content)
       entities    = map buildEntity allEntities
