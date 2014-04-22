@@ -50,6 +50,4 @@ buildQueryDeclaration :: Attribute -> String
 buildQueryDeclaration a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ ";\n\n" | (_, z) <- operators, y <- [attrName a]]
 
 buildQueryImplementation :: Attribute -> String
-buildQueryImplementation a = concat ["- (void)" ++ y ++ z ++ signature ++ " {\n\n" ++ "}\n" | (x, z) <- operators, y <- [attrName a]]
---"- (void)" ++ (attrName a) ++ operators ++ " {" ++ "\n\n"
---                          ++ "}\n\n"
+buildQueryImplementation a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ " {\n\n" ++ "}\n" | (x, z) <- operators, y <- [attrName a]]
