@@ -2,6 +2,11 @@ module CoreDataHs
 ( modelEntities
 , fullModelPath
 , findEntity
+, Entity(Entity)
+, Attribute(Attribute)
+, entityName
+, entityAttributes
+, attrName
 ) where
 
 import Text.XML.Light
@@ -53,7 +58,7 @@ buildAttribute e = (Attribute (nameAttr e) (typeAttr e))
 fullModelPath :: String -> String
 fullModelPath s = (s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents")
 
-modelEntities ::  String -> [Entity]
+modelEntities :: String -> [Entity]
 modelEntities s = entities
                     where
                     content     = parseXML s
