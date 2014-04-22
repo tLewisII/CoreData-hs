@@ -10,4 +10,5 @@ main = do
   let modelName = if (length args) > 0 then (head args) else error "no Model name given."
   xml <- readFile (fullModelPath modelName)
   let a = modelEntities xml
-  sequence_ [(writeFile p c) | (p, c) <- zip (map fileName a) (map buildDeclaration a)]
+  sequence_ [(writeFile p c) | (p, c) <- zip (map intFileName a) (map buildDeclaration a)]
+  sequence_ [(writeFile p c) | (p, c) <- zip (map impFileName a) (map buildImplementation a)]
