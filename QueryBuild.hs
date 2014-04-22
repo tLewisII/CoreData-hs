@@ -1,18 +1,18 @@
 module QueryBuild
-(
- buildDeclaration
-,buildImplementation
-,intFileName
-,impFileName
+( buildDeclaration
+, buildImplementation
+, intFileName
+, impFileName
 ) where
 import CoreDataHs
 operators :: [(String, String)]
 operators = [
-            ("=", "isEqualTo"),
-            ("<", "isLessThan"),
-            (">", "isGreaterThan"),
-            (">=", "isGreaterThanOrEqualTo"),
-            ("<=", "isLessThanOrEqualTo")
+            ("=",  "IsEqualTo"),
+            ("<",  "IsLessThan"),
+            (">",  "IsGreaterThan"),
+            (">=", "IsGreaterThanOrEqualTo"),
+            ("<=", "IsLessThanOrEqualTo"),
+            ("!=", "IsNotEqualTo")
             ]
 signature :: String
 signature = ":(id)object " ++ "inContext:(NSManagedObjectContext *)context " ++ "error:(NSError **)error"
@@ -38,16 +38,14 @@ buildDeclaration e = final
 buildImplementation :: Entity -> String
 buildImplementation e = final
                       where
-                      imports = "#import <CoreData/CoreData.h>\n"
-                                   ++ "#import <Foundation/Foundation.h>\n"
                       declaration = "@implementation " ++ (entityName e) ++ " (fetch)\n"
 
                       requests = map buildQueryImplementation (entityAttributes e)
                       end = "@end\n\n"
-                      final = imports ++ declaration ++ (concat requests) ++ end
+                      final = declaration ++ (concat requests) ++ end
 
 buildQueryDeclaration :: Attribute -> String
 buildQueryDeclaration a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ ";\n\n" | (_, z) <- operators, y <- [attrName a]]
 
 buildQueryImplementation :: Attribute -> String
-buildQueryImplementation a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ " {\n\n" ++ "}\n" | (x, z) <- operators, y <- [attrName a]]
+buildQueryImplementation a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ " {\n" ++ "\treturn nil\n" ++ "}\n" | (x, z) <- operators, y <- [attrName a]]
