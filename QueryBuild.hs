@@ -48,4 +48,4 @@ buildQueryDeclaration :: Attribute -> String
 buildQueryDeclaration a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ ";\n\n" | (_, z) <- operators, y <- [attrName a]]
 
 buildQueryImplementation :: Attribute -> String
-buildQueryImplementation a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ " {\n" ++ "\treturn nil\n" ++ "}\n" | (x, z) <- operators, y <- [attrName a]]
+buildQueryImplementation a = concat ["- (NSArray *)" ++ y ++ z ++ signature ++ " {\n" ++ "\tNSFetchRequest *fetch = [NSFetchRequest fetchRequestWithEntityName:" ++ "@\"" ++ (entName a)  ++ "\"];\n" ++ "}\n" | (x, z) <- operators, y <- [attrName a]]

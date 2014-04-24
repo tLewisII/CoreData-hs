@@ -3,7 +3,7 @@ module CoreDataHs
 , fullModelPath
 , findEntity
 , Entity(Entity)
-, Attribute(Attribute)
+, Attribute(Attribute, entName)
 , entityName
 , entityAttributes
 , attrName
@@ -17,6 +17,7 @@ import System.Environment
 data Attribute = Attribute {
                               attrName :: String
                             , attrType :: String
+                            , entName  :: String
                            } deriving (Show)
 data Entity = Entity {
                         entityName :: String
@@ -42,7 +43,7 @@ relationships :: Element -> [String]
 relationships e = (map nameAttr (relChild e))
 
 buildEntity :: Element -> Entity
-buildEntity e = (Entity (nameAttr e) (map buildAttribute (attrElements e))  (relationships e))
+buildEntity e = (Entity (nameAttr e) ([buildAttribute x y | x <- (attrElements e), y <- [e]])  (relationships e))
 
 entityAttrs :: Element -> [String]
 entityAttrs e = (map nameAttr (attrElements e))
@@ -52,8 +53,9 @@ findEntity "" _ = Nothing
 findEntity _ [] = Nothing
 findEntity s e = find (\(Entity name _ _) -> name == s) e
 
-buildAttribute :: Element -> Attribute
-buildAttribute e = (Attribute (nameAttr e) (typeAttr e))
+buildAttribute :: Element -> Element -> Attribute
+buildAttribute e b = (Attribute (nameAttr e) (typeAttr e) (nameAttr b))
+
 
 fullModelPath :: String -> String
 fullModelPath s = (s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents")
