@@ -22,7 +22,7 @@ out by hand.
 
 ## Installation
 
-The easiest way to currently "install" CoreData-hs is to download the executable in the distribution folder. Or, if you want you can download and build it from the source. It is written in [Haskell](http://haskell.org), and you will need the ghc compiler to build the executable.
+The easiest way to currently "install" CoreData-hs is to download the executable in the "distribution" folder. Or, if you want you can download and build it from the source. It is written in [Haskell](http://haskell.org), and you will need the ghc compiler to build the executable.
 
 ## Usage
 
@@ -31,7 +31,7 @@ Simply pass the name of the Model file you wish to generate requests for, withou
 
 ## Options
 
-Currently, the only options available are -V or --version to get the version number.
+Currently, there are no options available.
 
 ## License
 
