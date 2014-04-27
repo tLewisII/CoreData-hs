@@ -58,7 +58,7 @@ buildDeclaration e = final
                       where
                       imports = "#import <CoreData/CoreData.h>\n"
                                    ++ "#import <Foundation/Foundation.h>\n"
-                      declaration = "@interface " ++ (entityName e) ++ " (fetch)\n\n"
+                      declaration = "@interface " ++ (entityName e) ++ " (Fetcher)\n\n"
 
                       requests = map buildQueryDeclaration (entityAttributes e)
                       stringDec = map buildQueryStringDeclaration (entityAttributes e)
@@ -69,7 +69,7 @@ buildDeclaration e = final
 buildImplementation :: Entity -> String
 buildImplementation e = final
                       where
-                      declaration = "@implementation " ++ (entityName e) ++ " (fetch)\n"
+                      declaration = "@implementation " ++ (entityName e) ++ " (Fetcher)\n"
 
                       requests = [buildQueryImplementation x y | x <- (entityAttributes e), y <- [e]]
                       stringReq = [buildQueryStringImplementation x y | x <- (entityAttributes e), y <- [e]]
