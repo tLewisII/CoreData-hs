@@ -3,7 +3,7 @@ module CoreDataHs
 , fullModelPath
 , findEntity
 , Entity(Entity)
-, Attribute(Attribute, entName)
+, Attribute(Attribute, entName, attrType)
 , entityName
 , entityAttributes
 , attrName

@@ -5,15 +5,26 @@ module QueryBuild
 , impFileName
 ) where
 import CoreDataHs
-operators :: [(String, String)]
-operators = [
+
+normalOperators :: [(String, String)]
+normalOperators = [
             ("=",  "IsEqualTo"),
             ("<",  "IsLessThan"),
             (">",  "IsGreaterThan"),
             (">=", "IsGreaterThanOrEqualTo"),
             ("<=", "IsLessThanOrEqualTo"),
-            ("!=", "IsNotEqualTo")
+            ("!=", "IsNotEqualTo"),
+            ("BETWEEN", "IsBetwixt")
             ]
+
+stringOperators :: [(String, String)]
+stringOperators = [
+                ("LIKE", "IsLike"),
+                ("CONTAINS", "Contains"),
+                ("MATCHES", "Matches"),
+                ("BEGINSWITH", "BeginsWith"),
+                ("ENDSWITH", "EndsWith")
+                ]
 
 fetchRequest :: Entity -> String
 fetchRequest e = "\tNSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:" ++ "@\"" ++ (entityName e) ++ "\"];\n"
@@ -50,8 +61,9 @@ buildDeclaration e = final
                       declaration = "@interface " ++ (entityName e) ++ " (fetch)\n\n"
 
                       requests = map buildQueryDeclaration (entityAttributes e)
+                      stringDec = map buildQueryStringDeclaration (entityAttributes e)
                       end = "@end\n\n"
-                      final = imports ++ declaration ++ (concat requests) ++ end
+                      final = imports ++ declaration ++ (concat requests) ++ (concat stringDec) ++ end
 
 
 buildImplementation :: Entity -> String
@@ -60,11 +72,18 @@ buildImplementation e = final
                       declaration = "@implementation " ++ (entityName e) ++ " (fetch)\n"
 
                       requests = [buildQueryImplementation x y | x <- (entityAttributes e), y <- [e]]
+                      stringReq = [buildQueryStringImplementation x y | x <- (entityAttributes e), y <- [e]]
                       end = "@end\n\n"
-                      final = declaration ++ (concat requests) ++ end
+                      final = declaration ++ (concat requests) ++ (concat stringReq) ++ end
 
 buildQueryDeclaration :: Attribute -> String
-buildQueryDeclaration a = concat ["+ (NSArray *)" ++ y ++ z ++ signature ++ ";\n\n" | (_, z) <- operators, y <- [attrName a]]
+buildQueryDeclaration a = concat ["+ (NSArray *)" ++ y ++ z ++ signature ++ ";\n\n" | (_, z) <- normalOperators, y <- [attrName a]]
+
+buildQueryStringDeclaration :: Attribute -> String
+buildQueryStringDeclaration a = concat ["+ (NSArray *)" ++ (attrName y) ++ z ++ signature ++ ";\n\n" | (_, z) <- stringOperators, y <- [a], (attrType a) == "String"]
 
 buildQueryImplementation :: Attribute -> Entity -> String
-buildQueryImplementation a e = concat ["+ (NSArray *)" ++ y ++ z ++ signature ++ " {\n" ++ (fetchRequest e)  ++ (setPredicate a x) ++ sortDescriptor ++ errorVar ++ executeFetch ++ errorBlock ++ "\treturn results;" ++ "\n}\n\n" | (x, z) <- operators, y <- [attrName a]]
+buildQueryImplementation a e = concat ["+ (NSArray *)" ++ y ++ z ++ signature ++ " {\n" ++ (fetchRequest e)  ++ (setPredicate a x) ++ sortDescriptor ++ errorVar ++ executeFetch ++ errorBlock ++ "\treturn results;" ++ "\n}\n\n" | (x, z) <- normalOperators, y <- [attrName a]]
+
+buildQueryStringImplementation :: Attribute -> Entity -> String
+buildQueryStringImplementation a e = concat ["+ (NSArray *)" ++ (attrName y) ++ z ++ signature ++ " {\n" ++ (fetchRequest e)  ++ (setPredicate a x) ++ sortDescriptor ++ errorVar ++ executeFetch ++ errorBlock ++ "\treturn results;" ++ "\n}\n\n" | (x, z) <- stringOperators, y <- [a], (attrType a) == "String"]
