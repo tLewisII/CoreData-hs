@@ -34,31 +34,31 @@ nameAttr :: Element -> String
 nameAttr e = fromJust $ (findAttr $ simpleName "name") e
 
 attrElements :: Element -> [Element]
-attrElements e = (findChildren $ simpleName "attribute") e
+attrElements = findChildren $ simpleName "attribute"
 
 relChild :: Element -> [Element]
-relChild e = (findChildren $ simpleName "relationship") e
+relChild = findChildren $ simpleName "relationship"
 
 relationships :: Element -> [String]
-relationships e = (map nameAttr (relChild e))
+relationships e = map nameAttr (relChild e)
 
 buildEntity :: Element -> Entity
-buildEntity e = (Entity (nameAttr e) ([buildAttribute x y | x <- (attrElements e), y <- [e]])  (relationships e))
+buildEntity e = Entity (nameAttr e) [buildAttribute x y | x <- attrElements e, y <- [e]]  (relationships e)
 
 entityAttrs :: Element -> [String]
-entityAttrs e = (map nameAttr (attrElements e))
+entityAttrs e = map nameAttr (attrElements e)
 
-findEntity :: String -> [Entity] -> (Maybe Entity)
+findEntity :: String -> [Entity] -> Maybe Entity
 findEntity "" _ = Nothing
 findEntity _ [] = Nothing
 findEntity s e = find (\(Entity name _ _) -> name == s) e
 
 buildAttribute :: Element -> Element -> Attribute
-buildAttribute e b = (Attribute (nameAttr e) (typeAttr e) (nameAttr b))
+buildAttribute e b = Attribute (nameAttr e) (typeAttr e) (nameAttr b)
 
 
 fullModelPath :: String -> String
-fullModelPath s = (s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents")
+fullModelPath s = s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents"
 
 modelEntities :: String -> [Entity]
 modelEntities s = entities
