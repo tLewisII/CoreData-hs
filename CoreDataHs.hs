@@ -61,8 +61,4 @@ fullModelPath :: String -> String
 fullModelPath s = s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents"
 
 modelEntities :: String -> [Entity]
-modelEntities s = entities
-                    where
-                    content     = parseXML s
-                    allEntities = concatMap (findElements $ simpleName "entity") (onlyElems content)
-                    entities    = map buildEntity allEntities
+modelEntities = map buildEntity . concatMap (findElements $ simpleName "entity") . onlyElems . parseXML

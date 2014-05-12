@@ -5,11 +5,14 @@ import QueryBuild
 import System.Environment
 import Control.Arrow
 
+progressIO :: String -> IO ()
+progressIO p = putStrLn $ "Creating file " ++ p ++ " in current directory"
+
 main :: IO ()
 main = do
   args <- getArgs
   let modelName = if not (null args) then head args else error "no Model name given."
-  xml <- readFile (fullModelPath modelName)
-  let a = modelEntities xml
-  sequence_ [writeFile p c | (p, c) <- map (intFileName &&& buildDeclaration) a]
-  sequence_ [writeFile p c | (p, c) <- map (impFileName &&& buildImplementation) a]
+  entities <- readFile (fullModelPath modelName) >>= return . modelEntities
+  sequence_ [(progressIO p) >> writeFile p c | (p, c) <- map (intFileName &&& buildDeclaration) entities]
+  sequence_ [(progressIO p) >> writeFile p c | (p, c) <- map (impFileName &&& buildImplementation) entities]
+  putStrLn "done!"
