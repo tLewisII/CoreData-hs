@@ -43,7 +43,7 @@ relationships :: Element -> [String]
 relationships e = map nameAttr (relChild e)
 
 buildEntity :: Element -> Entity
-buildEntity e = Entity (nameAttr e) [buildAttribute x y | x <- attrElements e, y <- [e]]  (relationships e)
+buildEntity e = Entity (nameAttr e) [buildAttribute x e | x <- attrElements e]  (relationships e)
 
 entityAttrs :: Element -> [String]
 entityAttrs e = map nameAttr (attrElements e)

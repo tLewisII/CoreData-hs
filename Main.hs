@@ -6,7 +6,7 @@ import System.Environment
 import Control.Arrow
 
 progressIO :: String -> IO ()
-progressIO p = putStrLn $ "Creating file " ++ p ++ " in current directory"
+progressIO p = putStrLn $ "Creating file " ++ p
 
 main :: IO ()
 main = do
