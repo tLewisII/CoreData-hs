@@ -26,8 +26,9 @@ The easiest way to currently "install" CoreData-hs is to download the executable
 
 ## Usage
 
-    $ ./CoreDataHs [ModelFileName]
-Simply pass the name of the Model file you wish to generate requests for, without any extensions and Fetcher will do the rest.
+    $ ./coredata-hs [ModelFileName]
+Simply pass the name of the Model file you wish to generate requests for, without any extensions and CoreData-hs will do the rest.
+You can also drop the executable in `usr/local/bin` if you want to be able to run it from anywhere.
 
 ## Options
 
