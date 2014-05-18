@@ -26,13 +26,13 @@ The easiest way to currently "install" CoreData-hs is to download the executable
 
 ## Usage
 
-    $ ./coredata-hs [ModelFileName]
+`$ ./coredata-hs [ModelFileName]`
 Simply pass the name of the Model file you wish to generate requests for, without any extensions and CoreData-hs will do the rest.
 You can also drop the executable in `usr/local/bin` if you want to be able to run it from anywhere.
 
 ## Options
 
-Currently, there are no options available.
+`$ ./coredata-hs -V` or `$ ./coredata-hs --version` returns the current version. Or, if you want to generate requests for a single entity, rather than all of them do `$ ./coredata-hs ModelFileName --entity EntityName` and only requests for the given entity will be created.
 
 ## License
 
