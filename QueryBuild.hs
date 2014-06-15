@@ -42,7 +42,7 @@ executeFetch :: String
 executeFetch = "\tNSArray *results = [context executeFetchRequest:fetchRequest error:&err];\n"
 
 errorBlock :: String
-errorBlock = "\tif(err && errorBlock) {\n" ++ "\t\terrorBlock(err);\n" ++ "\t\treturn nil;\n" ++ "\t}\n"
+errorBlock = "\tif(!result && errorBlock) {\n" ++ "\t\terrorBlock(err);\n" ++ "\t\treturn nil;\n" ++ "\t}\n"
 
 signature :: String
 signature = ":(id)object " ++ "inContext:(NSManagedObjectContext *)context " ++ "sortDescriptors:(NSArray *)sort" ++  " error:(void(^)(NSError *error))errorBlock"
