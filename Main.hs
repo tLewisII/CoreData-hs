@@ -5,7 +5,6 @@ import QueryBuild
 import System.Environment
 import Control.Arrow
 import Control.Applicative
-import System.Exit
 import Data.Maybe
 
 version :: IO ()
@@ -24,7 +23,7 @@ parseArgs [] = error "no Model name given."
 parseArgs ["-V"] = version
 parseArgs ["--version"] = version
 parseArgs [a] = modelEntities <$> readFile (fullModelPath a) >>= writeFiles
-parseArgs [a, "--entity"] = error "No Entity name given"
+parseArgs [_, "--entity"] = error "No Entity name given"
 parseArgs [a, "--entity", c] = modelEntities <$> readFile (fullModelPath a) >>= ifEntity c . findEntity c >>= writeFiles
 parseArgs _ = putStrLn "Unrecognized command"
 

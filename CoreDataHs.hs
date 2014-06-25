@@ -10,9 +10,7 @@ module CoreDataHs
 ) where
 
 import Text.XML.Light
-import Data.Maybe
 import Data.List
-import System.Environment
 
 data Attribute = Attribute {
                               attrName :: String
@@ -24,14 +22,19 @@ data Entity = Entity {
                       , entityAttributes :: [Attribute]
                       , entityRelationships :: [String]
                      } deriving (Show)
-
+                     
+simpleName :: String -> QName
 simpleName s = QName s Nothing Nothing
 
 typeAttr :: Element -> String
-typeAttr e = fromJust $ (findAttr $ simpleName "attributeType") e
+typeAttr e = case (findAttr $ simpleName "attributeType") e of
+				Just a -> a
+				Nothing -> error "element 'attributeType' not found"
 
 nameAttr :: Element -> String
-nameAttr e = fromJust $ (findAttr $ simpleName "name") e
+nameAttr e = case (findAttr $ simpleName "name") e of
+				Just a -> a
+				Nothing -> error "element 'name' not found"
 
 attrElements :: Element -> [Element]
 attrElements = findChildren $ simpleName "attribute"
@@ -55,7 +58,6 @@ findEntity s e = find (\(Entity name _ _) -> name == s) e
 
 buildAttribute :: Element -> Element -> Attribute
 buildAttribute e b = Attribute (nameAttr e) (typeAttr e) (nameAttr b)
-
 
 fullModelPath :: String -> String
 fullModelPath s = s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents"
