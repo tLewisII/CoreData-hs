@@ -6,6 +6,8 @@ import System.Environment
 import Control.Arrow
 import Control.Applicative
 import Data.Maybe
+import Control.Concurrent
+import Control.Concurrent.Async
 
 version :: IO ()
 version = putStrLn "coredata-hs version 0.1.0"
@@ -25,14 +27,17 @@ parseArgs ["--version"] = version
 parseArgs [a] = modelEntities <$> readFile (fullModelPath a) >>= writeFiles
 parseArgs [_, "--entity"] = error "No Entity name given"
 parseArgs [a, "--entity", c] = modelEntities <$> readFile (fullModelPath a) >>= ifEntity c . findEntity c >>= writeFiles
+
 parseArgs _ = putStrLn "Unrecognized command"
 
 
 writeFiles :: [Entity] -> IO ()
-writeFiles e = do
-              sequence_ [progressIO p >> writeFile p c | (p, c) <- map (intFileName &&& buildDeclaration) e]
-              sequence_ [progressIO p >> writeFile p c | (p, c) <- map (impFileName &&& buildImplementation) e]
-              putStrLn "done!"
+writeFiles e = do		
+		a1 <- async $ sequence_ [progressIO p >> writeFile p c | (p, c) <- map (intFileName &&& buildDeclaration) e]              		 		  
+		a2 <- async $ sequence_ [progressIO p >> writeFile p c | (p, c) <- map (impFileName &&& buildImplementation) e]        				  
+		wait a1
+		wait a2
+		putStrLn "Done!"
 
 main :: IO ()
 main = getArgs >>= parseArgs
