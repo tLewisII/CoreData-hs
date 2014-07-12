@@ -84,6 +84,8 @@ You can also drop the executable in `usr/local/bin` if you want to be able to ru
 ## Options
 
 `$ ./coredata-hs -V` or `$ ./coredata-hs --version` returns the current version. Or, if you want to generate requests for a single entity, rather than all of them do `$ ./coredata-hs ModelFileName --entity EntityName` and only requests for the given entity will be created.
+You can also specify the model version you are using, like so: `$ ./coredata-hs [ModelFileName] --model-version 0.1` or whatever your version is.
+This also works for single entities: `$ ./coredata-hs [ModelFileName] --entity Person --model-version 0.1`
 
 ## License
 
