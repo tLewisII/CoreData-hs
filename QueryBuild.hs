@@ -51,7 +51,7 @@ executeFetch :: String
 executeFetch = "\tNSArray *results = [context executeFetchRequest:fetchRequest error:&err];\n"
 
 errorBlock :: String
-errorBlock = "\tif(!result && errorBlock) {\n" 
+errorBlock = "\tif(!results && errorBlock) {\n" 
               ++ "\t\terrorBlock(err);\n" 
               ++ "\t\treturn nil;\n" 
               ++ "\t}\n"
@@ -73,6 +73,7 @@ buildDeclaration (Entity name attributes _) = final
                       where
                       imports = "#import <CoreData/CoreData.h>\n"
                                    ++ "#import <Foundation/Foundation.h>\n"
+                                   ++ "#import \"" ++ name ++ ".h\"" ++ "\n\n"
                       declaration = "@interface " ++ name ++ " (Fetcher)\n\n"
                       requests = map buildQueryDeclaration attributes
                       stringDec = map buildQueryStringDeclaration attributes
@@ -83,11 +84,12 @@ buildDeclaration (Entity name attributes _) = final
 buildImplementation :: Entity -> String
 buildImplementation e@(Entity name attributes _) = final
                       where
+                      imports = "#import \"" ++ name ++ "_Fetcher.h\"" ++ "\n\n"                      
                       declaration = "@implementation " ++ name ++ " (Fetcher)\n"
                       requests = [buildQueryImplementation x e | x <- attributes]
                       stringReq = [buildQueryStringImplementation x e | x <- attributes]
                       end = "@end\n\n"
-                      final = declaration ++ concat requests ++ concat stringReq ++ end
+                      final = imports ++ declaration ++ concat requests ++ concat stringReq ++ end
 
 buildQueryDeclaration :: Attribute -> String
 buildQueryDeclaration (Attribute name _ _) = concat ["+ (NSArray *)" 
