@@ -27,7 +27,8 @@ parseArgs ["--version"] = version
 parseArgs [a] = modelEntities <$> readFile (fullModelPath a) >>= writeFiles
 parseArgs [_, "--entity"] = error "No Entity name given"
 parseArgs [a, "--entity", c] = modelEntities <$> readFile (fullModelPath a) >>= ifEntity c . findEntity c >>= writeFiles
-
+parseArgs [a, "--entity", b, "--model-version", c] = modelEntities <$> readFile (versionModelPath a c) >>= ifEntity b . findEntity b >>= writeFiles
+parseArgs [a, "--model-version", c] = modelEntities <$> readFile (versionModelPath a c) >>= writeFiles
 parseArgs _ = putStrLn "Unrecognized command"
 
 

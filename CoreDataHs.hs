@@ -1,6 +1,7 @@
 module CoreDataHs
 ( modelEntities
 , fullModelPath
+, versionModelPath
 , findEntity
 , Entity(Entity)
 , Attribute(Attribute, entName, attrType)
@@ -61,6 +62,9 @@ buildAttribute e b = Attribute (nameAttr e) (typeAttr e) (nameAttr b)
 
 fullModelPath :: String -> String
 fullModelPath s = s ++ ".xcdatamodeld/" ++ s ++ ".xcdatamodel/contents"
+
+versionModelPath :: String -> String -> String
+versionModelPath s v = s ++ ".xcdatamodeld/" ++ s ++ "_" ++ v ++ ".xcdatamodel/contents"
 
 modelEntities :: String -> [Entity]
 modelEntities = map buildEntity . concatMap (findElements $ simpleName "entity") . onlyElems . parseXML
