@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module QueryBuild
 ( buildDeclaration
 , buildImplementation
@@ -5,8 +6,11 @@ module QueryBuild
 , impFileName
 ) where
 import CoreDataHs
+import Data.Text(Text, pack, concat)
+import Data.Monoid
+import Prelude hiding(concat)
 
-normalOperators :: [(String, String)]
+normalOperators :: [(Text, Text)]
 normalOperators = [
             ("=",  "IsEqualTo"),
             ("<",  "IsLessThan"),
@@ -17,7 +21,7 @@ normalOperators = [
             ("BETWEEN", "IsBetwixt")
             ]
 
-stringOperators :: [(String, String)]
+stringOperators :: [(Text, Text)]
 stringOperators = [
                 ("LIKE", "IsLike"),
                 ("CONTAINS", "Contains"),
@@ -26,115 +30,115 @@ stringOperators = [
                 ("ENDSWITH", "EndsWith")
                 ]
 
-fetchRequest :: Entity -> String
+fetchRequest :: Entity -> Text
 fetchRequest (Entity name _ _) = "\tNSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:" 
-                                  ++ "@\"" 
-                                  ++ name 
-                                  ++ "\"];\n"
+                                  <> "@\"" 
+                                  <> name 
+                                  <> "\"];\n"
 
-setPredicate :: Attribute -> String -> String
+setPredicate :: Attribute -> Text -> Text
 setPredicate a s = "\t[fetchRequest setPredicate:[NSPredicate predicateWithFormat:" 
-                    ++ "@\"" 
-                    ++ attrName a 
-                    ++  " " 
-                    ++ s 
-                    ++ " %@\", " 
-                    ++ "object]];\n"
+                    <> "@\"" 
+                    <> attrName a 
+                    <>  " " 
+                    <> s 
+                    <> " %@\", " 
+                    <> "object]];\n"
 
-sortDescriptor :: String
+sortDescriptor :: Text
 sortDescriptor = "\t[fetchRequest setSortDescriptors:sort];\n"
 
-errorVar :: String
+errorVar :: Text
 errorVar = "\tNSError *err = nil;\n"
 
-executeFetch :: String
+executeFetch :: Text
 executeFetch = "\tNSArray *results = [context executeFetchRequest:fetchRequest error:&err];\n"
 
-errorBlock :: String
+errorBlock :: Text
 errorBlock = "\tif(!results && errorBlock) {\n" 
-              ++ "\t\terrorBlock(err);\n" 
-              ++ "\t\treturn nil;\n" 
-              ++ "\t}\n"
+              <> "\t\terrorBlock(err);\n" 
+              <> "\t\treturn nil;\n" 
+              <> "\t}\n"
 
-signature :: String
+signature :: Text
 signature = ":(id)object " 
-            ++ "inContext:(NSManagedObjectContext *)context " 
-            ++ "sortDescriptors:(NSArray *)sort" 
-            ++  " error:(void(^)(NSError *error))errorBlock"
+            <> "inContext:(NSManagedObjectContext *)context " 
+            <> "sortDescriptors:(NSArray *)sort" 
+            <>  " error:(void(^)(NSError *error))errorBlock"
 
-intFileName :: Entity -> String
-intFileName (Entity name _ _) = name ++ "_Fetcher.h"
+intFileName :: Entity -> Text
+intFileName (Entity name _ _) = name <> "_Fetcher.h"
 
-impFileName :: Entity -> String
-impFileName (Entity name _ _) = name ++ "_Fetcher.m"
+impFileName :: Entity -> Text
+impFileName (Entity name _ _) = name <> "_Fetcher.m"
 
-buildDeclaration :: Entity -> String
+buildDeclaration :: Entity -> Text
 buildDeclaration (Entity name attributes _) = final
                       where
                       imports = "#import <CoreData/CoreData.h>\n"
-                                   ++ "#import <Foundation/Foundation.h>\n"
-                                   ++ "#import \"" ++ name ++ ".h\"" ++ "\n\n"
-                      declaration = "@interface " ++ name ++ " (Fetcher)\n\n"
+                                   <> "#import <Foundation/Foundation.h>\n"
+                                   <> "#import \"" <> name <> ".h\"" <> "\n\n"
+                      declaration = "@interface " <> name <> " (Fetcher)\n\n"
                       requests = map buildQueryDeclaration attributes
                       stringDec = map buildQueryStringDeclaration attributes
                       end = "@end\n\n"
-                      final = imports ++ declaration ++ concat requests ++ concat stringDec ++ end
+                      final = imports <> declaration <> concat requests <> concat stringDec <> end
 
 
-buildImplementation :: Entity -> String
+buildImplementation :: Entity -> Text
 buildImplementation e@(Entity name attributes _) = final
                       where
-                      imports = "#import \"" ++ name ++ "_Fetcher.h\"" ++ "\n\n"                      
-                      declaration = "@implementation " ++ name ++ " (Fetcher)\n"
+                      imports = "#import \"" <> name <> "_Fetcher.h\"" <> "\n\n"                      
+                      declaration = "@implementation " <> name <> " (Fetcher)\n"
                       requests = [buildQueryImplementation x e | x <- attributes]
                       stringReq = [buildQueryStringImplementation x e | x <- attributes]
                       end = "@end\n\n"
-                      final = imports ++ declaration ++ concat requests ++ concat stringReq ++ end
+                      final = imports <> declaration <> concat requests <> concat stringReq <> end
 
-buildQueryDeclaration :: Attribute -> String
+buildQueryDeclaration :: Attribute -> Text
 buildQueryDeclaration (Attribute name _ _) = concat ["+ (NSArray *)" 
-                                                      ++ name 
-                                                      ++ z 
-                                                      ++ signature 
-                                                      ++ ";\n\n" 
+                                                      <> name 
+                                                      <> z 
+                                                      <> signature 
+                                                      <> ";\n\n" 
                                                       | (_, z) <- normalOperators]
 
-buildQueryStringDeclaration :: Attribute -> String
+buildQueryStringDeclaration :: Attribute -> Text
 buildQueryStringDeclaration (Attribute name t _) = concat ["+ (NSArray *)" 
-                                                              ++ name 
-                                                              ++ z 
-                                                              ++ signature 
-                                                              ++ ";\n\n" 
+                                                              <> name 
+                                                              <> z 
+                                                              <> signature 
+                                                              <> ";\n\n" 
                                                               | (_, z) <- stringOperators, t == "String"]
 
-buildQueryImplementation :: Attribute -> Entity -> String
+buildQueryImplementation :: Attribute -> Entity -> Text
 buildQueryImplementation a@(Attribute name _ _) e = concat ["+ (NSArray *)" 
-                                                            ++ name 
-                                                            ++ z 
-                                                            ++ signature 
-                                                            ++ " {\n" 
-                                                            ++ fetchRequest e  
-                                                            ++ setPredicate a x 
-                                                            ++ sortDescriptor 
-                                                            ++ errorVar 
-                                                            ++ executeFetch 
-                                                            ++ errorBlock 
-                                                            ++ "\treturn results;" 
-                                                            ++ "\n}\n\n" 
+                                                            <> name 
+                                                            <> z 
+                                                            <> signature 
+                                                            <> " {\n" 
+                                                            <> fetchRequest e  
+                                                            <> setPredicate a x 
+                                                            <> sortDescriptor 
+                                                            <> errorVar 
+                                                            <> executeFetch 
+                                                            <> errorBlock 
+                                                            <> "\treturn results;" 
+                                                            <> "\n}\n\n" 
                                                             | (x, z) <- normalOperators]
 
-buildQueryStringImplementation :: Attribute -> Entity -> String
+buildQueryStringImplementation :: Attribute -> Entity -> Text
 buildQueryStringImplementation a@(Attribute name t _) e = concat ["+ (NSArray *)" 
-                                                                  ++ name 
-                                                                  ++ z 
-                                                                  ++ signature 
-                                                                  ++ " {\n" 
-                                                                  ++ fetchRequest e 
-                                                                  ++ setPredicate a x 
-                                                                  ++ sortDescriptor 
-                                                                  ++ errorVar 
-                                                                  ++ executeFetch 
-                                                                  ++ errorBlock 
-                                                                  ++ "\treturn results;" 
-                                                                  ++ "\n}\n\n" 
+                                                                  <> name 
+                                                                  <> z 
+                                                                  <> signature 
+                                                                  <> " {\n" 
+                                                                  <> fetchRequest e 
+                                                                  <> setPredicate a x 
+                                                                  <> sortDescriptor 
+                                                                  <> errorVar 
+                                                                  <> executeFetch 
+                                                                  <> errorBlock 
+                                                                  <> "\treturn results;" 
+                                                                  <> "\n}\n\n" 
                                                                   | (x, z) <- stringOperators, t == "String"]
